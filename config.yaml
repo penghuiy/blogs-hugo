@@ -1,0 +1,9 @@
+---
+contentdir: "contents"
+layoutdir: "layouts"
+publishdir: "public"
+indexes:
+  category: "categories"
+baseurl: "http://penghuiy.github.io/"
+canonifyurls: true
+theme: "hugo-blog-jeffprod"
