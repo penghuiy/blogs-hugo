@@ -46,11 +46,15 @@
     <div class="column is-9">
         <div class="tile is-child box">
             <div class="content">
-                <p>在kubernetes使用过程经常遇到A服务依赖B服务的情况，此时便需要添加控制以使得被依赖者B先行启动，在通过健康检查后再启动A</p>
+                <p>在kubernetes使用过程经常遇到A服务依赖B服务的情况，此时便需要添加控制以使得被依赖者pod-B先行启动，通过健康检查后再启动pod-A</p>
+
+<hr />
+
+<p>以zookeeper(B)与kafka-manager(A)为例，需要进行以下操作</p>
 
 <h3 id="步骤一-被依赖者添加健康检查-探针检测">步骤一：被依赖者添加健康检查，探针检测</h3>
 
-<p>以zookeeper为例</p>
+<p>zookeeper-deployment.yaml</p>
 
 <pre><code>livenessProbe:
   exec:
@@ -74,7 +78,7 @@ readinessProbe:
 
 <h3 id="步骤二-依赖者添加依赖检测">步骤二：依赖者添加依赖检测</h3>
 
-<p>以kafka-manager为例，依赖zookeeper pod</p>
+<p>kafka-manager-deployment.yaml</p>
 
 <pre><code>initContainers:
       - name: init-service
@@ -82,7 +86,17 @@ readinessProbe:
         command: ['sh', '-c', 'until nslookup zk-svc-client.dev; do echo waiting for zookeeper; sleep 2; done;']
 </code></pre>
 
-<p>扩展：zookeeper基于CAP理论中的cp，故假设有3台zk，一台宕机正常提供服务；两台宕机无法提供服务。</p>
+<p>特别注明：此处的<code>zk-svc-client属于Headless Service</code> (clusterIP: None)，当zk的<code>readinessProbe</code>检测成功后方可通过service name成功解析到pod id</p>
+
+<hr />
+
+<p>参考文档：</p>
+
+<p>initContainer：<a href="https://kubernetes.io/docs/concepts/workloads/pods/init-containers/">https://kubernetes.io/docs/concepts/workloads/pods/init-containers/</a></p>
+
+<p>readinessProbe：<a href="https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-probes/">https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-probes/</a></p>
+
+<p>Headless Service: <a href="https://kubernetes.io/docs/concepts/services-networking/service/">https://kubernetes.io/docs/concepts/services-networking/service/</a></p>
             </div>
         </div>
     </div>
