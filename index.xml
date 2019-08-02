@@ -16,7 +16,7 @@
       <pubDate>Fri, 29 Mar 2019 00:00:00 +0000</pubDate>
       
       <guid>https://www.sunlit.tk/post/kubernetes/01/</guid>
-      <description>&lt;p&gt;在kubernetes使用过程经常遇到A服务依赖B服务的情况，此时便需要添加控制以使得被依赖者B先行启动，在通过健康检查后再启动A&lt;/p&gt;</description>
+      <description>&lt;p&gt;在kubernetes使用过程经常遇到A服务依赖B服务的情况，此时便需要添加控制以使得被依赖者pod-B先行启动，通过健康检查后再启动pod-A&lt;/p&gt;</description>
     </item>
     
   </channel>
