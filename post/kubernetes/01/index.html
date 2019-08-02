@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="utf-8" />
+    <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>  | 如何解决k8s服务依赖</title>
+    <title>My Blogs About Devops  | 如何解决k8s服务依赖</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
     <link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet">
@@ -17,7 +17,7 @@
     
     <nav class="navbar is-fixed-top" role="navigation" aria-label="main navigation">
         <div class="navbar-brand">
-            <a class="navbar-item" href="https://www.sunlit.tk/">Home</a>
+            <a class="navbar-item" href="https://www.sunlit.tk">Home</a>
         </div>
     </nav>
     
@@ -46,9 +46,9 @@
     <div class="column is-9">
         <div class="tile is-child box">
             <div class="content">
-                
+                <p>在kubernetes使用过程经常遇到A服务依赖B服务的情况，此时便需要添加控制以使得被依赖者B先行启动，在通过健康检查后再启动A</p>
 
-<h3 id="姿势一-添加健康检查-探针检测">姿势一：添加健康检查，探针检测</h3>
+<h3 id="步骤一-被依赖者添加健康检查-探针检测">步骤一：被依赖者添加健康检查，探针检测</h3>
 
 <p>以zookeeper为例</p>
 
@@ -72,7 +72,7 @@ readinessProbe:
   timeoutSeconds: 5
 </code></pre>
 
-<h3 id="姿势二-添加依赖检测">姿势二：添加依赖检测</h3>
+<h3 id="步骤二-依赖者添加依赖检测">步骤二：依赖者添加依赖检测</h3>
 
 <p>以kafka-manager为例，依赖zookeeper pod</p>
 
@@ -83,7 +83,6 @@ readinessProbe:
 </code></pre>
 
 <p>扩展：zookeeper基于CAP理论中的cp，故假设有3台zk，一台宕机正常提供服务；两台宕机无法提供服务。</p>
-
             </div>
         </div>
     </div>
@@ -93,12 +92,17 @@ readinessProbe:
         <h1 class="title is-5">Tags</h1>
         <div class="tags">
         
+            <span class="tag"><a href="https://www.sunlit.tk/tags/kubernetes">kubernetes</a></span>
+        
         </div>          
     </div>
 </div><br>
         <div class="card">
     <div class="card-content">
         <h1 class="title is-5">Recent posts</h1>
+        
+            <h1><a href="https://www.sunlit.tk/post/kubernetes/01/">如何解决k8s服务依赖</a></h1>
+            <time class="has-text-grey-light is-size-7">29 March 2019</time>
         
     </div>
 </div>
@@ -111,6 +115,8 @@ readinessProbe:
         <div class="card">
     <div class="card-content">
         <h1 class="title is-5">Archives</h1>
+        
+            <a href="https://www.sunlit.tk/archives/2019">2019</a> (1)<br>
         
     </div>
 </div>
@@ -129,7 +135,7 @@ readinessProbe:
             <span class="icon is-large"><a href="https://www.youtube.com/" class="mysocial" rel="me"><i class="fab fa-youtube fa-3x"></i></a></span>&nbsp;&nbsp;
             <span class="icon is-large"><a href="https://github.com/" class="mysocial" rel="me"><i class="fab fa-github fa-3x"></i></a></span>&nbsp;&nbsp;
             <br><br>
-            Copyright &copy;  2019 - Theme by <a href="https://jeffprod.com" class="mysocial">JeffProd.com</a>
+            Copyright &copy; My Blogs About Devops 2019 - Theme by <a href="https://jeffprod.com" class="mysocial">JeffProd.com</a>
             - <a class="mysocial" href="https://www.sunlit.tk/about">About</a>
         </p>
     </div>
