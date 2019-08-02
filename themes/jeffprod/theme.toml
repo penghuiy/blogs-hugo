@@ -4,7 +4,7 @@
 name = "Jeffprod"
 license = "MIT"
 licenselink = "https://github.com/Tazeg/hugo-blog-jeffprod/blob/master/LICENSE"
-description = "A new theme blog for HUGO built with Bulma CSS. Including archives and tags widgets."
+description = "personal blogs"
 homepage = "https://www.sunlit.tk"
 tags = ["simple","blog","theme","pagination","archives","tags","bulma","personal"]
 features = ["pagination","archives","tags"]
@@ -12,4 +12,4 @@ min_version = "0.41"
 
 [author]
   name = "@PengHuiYang"
-  homepage = "https://jeffprod.com"
+  homepage = "https://www.sunlit.tk"

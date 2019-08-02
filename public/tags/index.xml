@@ -1,0 +1,23 @@
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Tags on My Blogs About Devops</title>
+    <link>https://www.sunlit.tk/tags/</link>
+    <description>Recent content in Tags on My Blogs About Devops</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <copyright>Copyright © 2001–2019, @PengHui Yang</copyright>
+    <lastBuildDate>Fri, 29 Mar 2019 00:00:00 +0000</lastBuildDate>
+    
+        <atom:link href="https://www.sunlit.tk/tags/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Kubernetes</title>
+      <link>https://www.sunlit.tk/tags/kubernetes/</link>
+      <pubDate>Fri, 29 Mar 2019 00:00:00 +0000</pubDate>
+      
+      <guid>https://www.sunlit.tk/tags/kubernetes/</guid>
+      <description></description>
+    </item>
+    
+  </channel>
+</rss>

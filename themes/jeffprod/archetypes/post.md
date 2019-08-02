@@ -1,7 +1,7 @@
 ---
 title: "{{ replace .Name "-" " " | title }}"
 date: {{ .Date }}
-archives: "{{ dateFormat "2006" now }}"
+archives: "{{ dateFormat "200601" now }}"
 tags: []
-author: John SMITH
+author: PengHui Yang
 ---

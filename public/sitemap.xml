@@ -3,35 +3,43 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   
   <url>
+    <loc>https://www.sunlit.tk/post/kubernetes/01/</loc>
+    <lastmod>2019-03-29T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://www.sunlit.tk/archives/2019/</loc>
+    <lastmod>2019-03-29T00:00:00+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://www.sunlit.tk/archives/</loc>
+    <lastmod>2019-03-29T00:00:00+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://www.sunlit.tk/tags/kubernetes/</loc>
+    <lastmod>2019-03-29T00:00:00+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
     <loc>https://www.sunlit.tk/</loc>
-    <lastmod>2019-04-29T00:00:00+00:00</lastmod>
-    <priority>0</priority>
-  </url>
-  
-  <url>
-    <loc>https://www.sunlit.tk/system/</loc>
-    <lastmod>2019-04-29T00:00:00+00:00</lastmod>
-    <priority>0</priority>
-  </url>
-  
-  <url>
-    <loc>https://www.sunlit.tk/system/02/</loc>
-    <lastmod>2019-04-29T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>https://www.sunlit.tk/k8s/</loc>
     <lastmod>2019-03-29T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
-    <loc>https://www.sunlit.tk/k8s/01/</loc>
+    <loc>https://www.sunlit.tk/post/</loc>
     <lastmod>2019-03-29T00:00:00+00:00</lastmod>
+    <priority>0</priority>
   </url>
   
   <url>
-    <loc>https://www.sunlit.tk/categories/</loc>
+    <loc>https://www.sunlit.tk/tags/</loc>
+    <lastmod>2019-03-29T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   

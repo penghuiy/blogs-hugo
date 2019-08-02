@@ -1,9 +1,0 @@
----
-contentdir: "contents"
-layoutdir: "layouts"
-publishdir: "public"
-indexes:
-  category: "categories"
-baseurl: "https://www.sunlit.tk/"
-canonifyurls: true
-theme: "hugo-blog-jeffprod"

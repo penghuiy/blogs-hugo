@@ -1,0 +1,16 @@
+baseurl = "https://www.sunlit.tk"
+title = "My Blogs About Devops"
+author = "@PengHui Yang"
+canonifyurls = true
+copyright = "Copyright © 2001–2019, @PengHui Yang"
+
+summaryLength = 30
+paginate = 5
+theme = "jeffprod"
+
+[permalinks]
+  posts = "/:year/:title/"
+
+[taxonomies]
+    tag = "tags"
+    archive = "archives"
