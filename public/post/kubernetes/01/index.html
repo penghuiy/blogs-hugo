@@ -98,6 +98,52 @@ readinessProbe:
 
 <p>Headless Service: <a href="https://kubernetes.io/docs/concepts/services-networking/service/">https://kubernetes.io/docs/concepts/services-networking/service/</a></p>
             </div>
+
+            <div id="container"></div>
+            <link rel="stylesheet" href="https://imsun.github.io/gitment/style/default.css">
+            <script src="https://www.sunlit.tk/js/gitment.browser.js"></script>
+            <script>
+            var gitment = new Gitment({
+              
+              owner: 'penghuiy',
+              repo: 'blogs-hugo',
+              oauth: {
+                client_id: '911f4edf9e215601099b',
+                client_secret: 'acf9b929960c2d742a71682fd83877212ad54532',
+              },
+            })
+            gitment.render('container')
+            </script>
+
+            <div class ="post-donate">
+              <div id="donate_board" class="donate_bar center">
+                <a id="btn_donate" class="btn_donate" href="javascript:;" title="Donate 打赏"></a>
+                <span class="donate_txt">
+                   &uarr;<br>
+                   Enjoy it ? Donate me !  欣赏此文？欢迎为作者提供支持！
+                </span>
+                <br>
+              </div>  
+          
+              <div id="donate_guide" class="donate_bar center hidden">
+                  <a href="https://www.sunlit.tk/img/alipay.jpg" title="支付宝打赏" class="fancybox" rel="article0"       style="float:left;margin-left:25%;margin-right:2px;">
+                  <img src="https://www.sunlit.tk/img/alipay.jpg" title="支付宝打赏" height="164px" width="164px">
+                  </a> 
+              </div>
+              <div id="donate_guide" class="donate_bar center hidden">
+                  <a href="https://www.sunlit.tk/img/wechat.png" title="支付宝打赏" class="fancybox" rel="article0"  >
+                  <img src="https://www.sunlit.tk/img/wechat.png" title="支付宝打赏" height="164px" width="164px">
+                  </a> 
+              </div>
+          
+              <script type="text/javascript">
+                document.getElementById('btn_donate').onclick = function(){
+                  $('#donate_board').addClass('hidden');
+                  $('#donate_guide').removeClass('hidden');
+                }
+              </script>
+            </div>
+
         </div>
     </div>
     <div class="column is-3">
