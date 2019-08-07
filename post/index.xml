@@ -1,19 +1,28 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>Posts on My Blogs About Devops</title>
+    <title>Posts on Sunlit&#39;s Blog</title>
     <link>https://www.sunlit.tk/post/</link>
-    <description>Recent content in Posts on My Blogs About Devops</description>
+    <description>Recent content in Posts on Sunlit&#39;s Blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <copyright>Copyright © 2001–2019, @PengHui Yang</copyright>
-    <lastBuildDate>Fri, 29 Mar 2019 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Tue, 06 Aug 2019 00:00:00 +0000</lastBuildDate>
     
         <atom:link href="https://www.sunlit.tk/post/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
+      <title>如何理解pod驱逐策略</title>
+      <link>https://www.sunlit.tk/post/kubernetes/02/</link>
+      <pubDate>Tue, 06 Aug 2019 00:00:00 +0000</pubDate>
+      
+      <guid>https://www.sunlit.tk/post/kubernetes/02/</guid>
+      <description>&lt;p&gt;Kubernetes集群node资源不是很充足，经常遇到pod被驱逐的情况。kubelet如何去挑选pod，本文进行大致总结&lt;/p&gt;</description>
+    </item>
+    
+    <item>
       <title>如何解决k8s服务依赖</title>
       <link>https://www.sunlit.tk/post/kubernetes/01/</link>
-      <pubDate>Fri, 29 Mar 2019 00:00:00 +0000</pubDate>
+      <pubDate>Mon, 29 Jul 2019 00:00:00 +0000</pubDate>
       
       <guid>https://www.sunlit.tk/post/kubernetes/01/</guid>
       <description>&lt;p&gt;在kubernetes使用过程经常遇到A服务依赖B服务的情况，此时便需要添加控制以使得被依赖者pod-B先行启动，通过健康检查后再启动pod-A&lt;/p&gt;</description>

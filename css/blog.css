@@ -11,6 +11,7 @@ html,body {
 .mysocial { color: hsl(0, 0%, 100%);}
 .mysocial:hover { color: hsl(0, 0%, 71%) }
 code {
-    color: #476582;
+    /* color: #476582; */
+    color: #F56C6C;
     font-family: 'source-code-pro', 'Menlo', 'Monaco', 'Consolas', 'Courier New', 'monospace';
 }
