@@ -1,0 +1,23 @@
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>201907 on Sunlit&#39;s Blog</title>
+    <link>https://www.sunlit.tk/archives/201907/</link>
+    <description>Recent content in 201907 on Sunlit&#39;s Blog</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <copyright>Copyright © 2001–2019, @PengHui Yang</copyright>
+    <lastBuildDate>Mon, 29 Jul 2019 00:00:00 +0000</lastBuildDate>
+    
+        <atom:link href="https://www.sunlit.tk/archives/201907/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>如何解决k8s服务依赖</title>
+      <link>https://www.sunlit.tk/post/kubernetes/01/</link>
+      <pubDate>Mon, 29 Jul 2019 00:00:00 +0000</pubDate>
+      
+      <guid>https://www.sunlit.tk/post/kubernetes/01/</guid>
+      <description>&lt;p&gt;在kubernetes使用过程经常遇到A服务依赖B服务的情况，此时便需要添加控制以使得被依赖者pod-B先行启动，通过健康检查后再启动pod-A&lt;/p&gt;</description>
+    </item>
+    
+  </channel>
+</rss>
