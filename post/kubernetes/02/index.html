@@ -61,7 +61,7 @@
 
 <li><p>优先级（未指定priorityClassName则默认是0）</p></li>
 
-<li><p>实际使用量与request的比值</p></li>
+<li><p>实际使用量与request的差值</p></li>
 </ol>
 
 <p>由于牵扯到BestEffort、Burstable、Burstable三种pod Qos等级，所以文档中进行了具体说明</p>
@@ -70,7 +70,7 @@
 Guaranteed pods and Burstable pods whose usage is beneath requests are evicted last. Guaranteed Pods are guaranteed only when requests and limits are specified for all the containers and they are equal. Such pods are guaranteed to never be evicted because of another Pod’s resource consumption. If a system daemon (such as kubelet, docker, and journald) is consuming more resources than were reserved via system-reserved or kube-reserved allocations, and the node only has Guaranteed or Burstable Pods using less than requests remaining, then the node must choose to evict such a Pod in order to preserve node stability and to limit the impact of the unexpected consumption to other Pods. In this case, it will choose to evict pods of Lowest Priority first.
 </code></pre>
 
-<p>超过memory request值的BestEffort或者Burstable的pod，按照Priority排序（Priority低的最先被驱逐），相同的则按照超过request的量排序（如果是多个container，则是它们使用量总和与request总和的比值，比值越大越先被驱逐）</p>
+<p>超过memory request值的BestEffort或者Burstable的pod，按照Priority排序（Priority低的最先被驱逐），相同的则按照超过request的量排序（如果是多个container，则是它们<code>使用量总和与request总和的差值，差值越大越先被驱逐</code>）</p>
 
 <p>未超过memory request值的Guaranteed或者Burstable的pod最后被驱逐（Guaranteed pod的定义是Pod里的每个容器都必须有内存CPU的limit和request，而且必须是一样的）。有任何其他类型pod消耗了资源，就意味着这些pod永远不会被驱逐。</p>
 
@@ -82,7 +82,7 @@ Guaranteed pods and Burstable pods whose usage is beneath requests are evicted l
 <li><p>burstable pods可能会在besteffort pods之前被驱逐</p></li>
 </ol>
 
-<p>如果一个系统后台进程（例如kubelet、docker、journald）消耗了系统预留或者kube预留的很多资源，此时<code>node上只有Guaranteed或者Burstable的pod</code>，node会选择驱逐使用量小于request的pod从而保护node稳定性和限制意外消耗对其他pod的影响。这种情况，它会首先选择驱逐Priority低的pod。</p>
+<p>如果一个系统后台进程（例如kubelet、docker、journald）消耗了系统预留或者kube预留的很多资源，此时<code>node上只有Guaranteed或者Burstable的pod</code>，node会选择驱逐使用量小于request的pod从而保护node稳定性和限制意外消耗对其他pod的影响。这种情况，它会<code>首先选择驱逐Priority低的pod</code>。</p>
 
 <h3 id="node-oom">Node OOM</h3>
 
