@@ -5,10 +5,28 @@
     <description>Recent content in Posts on Sunlit&#39;s Blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <copyright>Copyright © 2001–2019, @PengHui Yang</copyright>
-    <lastBuildDate>Tue, 06 Aug 2019 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Thu, 15 Aug 2019 00:00:00 +0000</lastBuildDate>
     
         <atom:link href="https://www.sunlit.tk/post/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>fluentd日志丢失故障记录及GKE日志轮转分析</title>
+      <link>https://www.sunlit.tk/post/infrastructure/01/</link>
+      <pubDate>Thu, 15 Aug 2019 00:00:00 +0000</pubDate>
+      
+      <guid>https://www.sunlit.tk/post/infrastructure/01/</guid>
+      <description>&lt;p&gt;发现业务log丢失，查看EFK三大组件均正常运行，fluentd CPU利用率较高，无ERROR级别log。本文记录下故障处理过程以及日志轮转对fluentd的影响&lt;/p&gt;</description>
+    </item>
+    
+    <item>
+      <title>jenkins被驱逐故障记录</title>
+      <link>https://www.sunlit.tk/post/kubernetes/03/</link>
+      <pubDate>Thu, 15 Aug 2019 00:00:00 +0000</pubDate>
+      
+      <guid>https://www.sunlit.tk/post/kubernetes/03/</guid>
+      <description>&lt;p&gt;在一次通过jenkins并行构建大批量服务时，由于cicd集群node节点memory压力过大，导致jenkins master被驱逐，造成开发测试阻塞。为何没有首先驱逐slave节点？本文简单记录下具体分析过程&lt;/p&gt;</description>
+    </item>
     
     <item>
       <title>如何理解pod驱逐策略</title>
