@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Sunlit&#39;s Blog  | fluentd日志丢失故障记录及GKE日志轮转分析</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.1/css/bulma.min.css" />
+    <link rel="stylesheet" href="https://www.sunlit.tk/css/blog.css" />
+    
+</head>
+<body>
+
+    
+    <nav class="navbar is-fixed-top" role="navigation" aria-label="main navigation">
+        <div class="navbar-brand">
+            <a class="navbar-item" href="https://www.sunlit.tk">Home</a>
+        </div>
+    </nav>
+    
+
+    
+    <section class="hero is-info is-medium">
+        <div class="hero-body" style="background-image: url(https://www.sunlit.tk/img/bg-blog.jpg);">
+            <div class="container has-text-centered">
+                <br>
+                <h1 class="title is-size-1">
+                    
+                        fluentd日志丢失故障记录及GKE日志轮转分析
+                    
+                </h1>
+                
+            </div>
+        </div>
+    </section>
+
+
+<div class="container">
+    <div class="section">
+    
+
+<div class="columns">
+    <div class="column is-9">
+        <div class="tile is-child box">
+            <div class="content">
+                <p>发现业务log丢失，查看EFK三大组件均正常运行，fluentd CPU利用率较高，无ERROR级别log。本文记录下故障处理过程以及日志轮转对fluentd的影响</p>
+
+<hr />
+
+<h3 id="一-log收集方案-efk">一、log收集方案（EFK）</h3>
+
+<ol>
+<li><p>pod打印log到stdout、stderr。docker守护进程将其持久化到<code>/var/lib/docker</code>目录，kubernetes将其软链接到<code>/var/lib/containers</code>.</p></li>
+
+<li><p>fluentd作为DeamonSet被部署在每个node上，并tail <code>/var/lib/containers</code>整个目录，格式转换后推送到Elasticsearch和GCS.</p></li>
+
+<li><p>Kibana从Elasticsearch读取log展示.</p></li>
+</ol>
+
+<p>这个过程中，fluentd需要维护一个缓冲区，按照官方文档说法，流式传输数据，buffer overflow_action应配置为默认值<code>throw_exception</code>。log收集应当属于流式传输。</p>
+
+<pre><code>overflow_action
+Control the buffer behaviour when the queue becomes full. 3 modes are supported:
+
+1. throw_exception
+This is default mode. This mode raises BufferOverflowError exception to input plugin. How handle BufferOverflowError depends on input plugins, e.g. tail input stops reading new lines, forward input returns an error to forward output. This action fits for streaming manner.
+
+2. block
+This mode stops input plugin thread until buffer full is resolved. This action is good for batch-like use-case.
+We don't recommend to use block action to avoid BufferOverflowError. Please consider improving destination setting to resolve BufferOverflowError or use @ERROR label for routing overflowed events to another backup destination(or secondary with lower retry_limit). If you hit BufferOverflowError frequently, it means your destination capacity is insufficient for your traffic.
+
+3. drop_oldest_chunk
+This mode drops oldest chunks. This mode is useful for monitoring system destinations. For monitoring, newer events are important than older.
+</code></pre>
+
+<p>in_tail插件会根据异常进行以下动作：</p>
+
+<pre><code>What happens when in_tail receives BufferOverflowError?
+in_tail stops reading new lines and pos file update until BufferOverflowError is resolved. After resolved BufferOverflowError, restart emitting new lines and pos file update.
+</code></pre>
+
+<h3 id="二-问题排查">二、问题排查</h3>
+
+<p>设置log级别debug</p>
+
+<pre><code>&lt;store ignore_error&gt;
+   @id elasticsearch
+   @type elasticsearch
+   @log_level debug
+  ...
+&lt;/store&gt;
+</code></pre>
+
+<p>发现如下关键log<code>cluster_block_exception</code></p>
+
+<pre><code>2019-05-31 11:39:12 +0000 [debug]: [elasticsearch] Indexed (op = index), 21 successes, 9020 cluster_block_exception
+2019-05-31 11:39:13 +0000 [debug]: [elasticsearch] Created new chunk chunk_id=&quot;58a2d76bfad8b58d43884fcdc488c11b&quot; metadata=#&lt;struct Fluent::Plugin::Buffer::Metadata timekey=nil, tag=&quot;microservice.access.*&quot;, variables=nil&gt;
+2019-05-31 11:39:14 +0000 [warn]: [elasticsearch] buffer flush took longer time than slow_flush_log_threshold: elapsed_time=42.28314201813191 slow_flush_log_threshold=20.0 plugin_id=&quot;elasticsearch&quot;
+2019-05-31 11:39:16 +0000 [debug]: [elasticsearch] Created new chunk chunk_id=&quot;58a2d76e8b62dbc65309e1bce7f0caa2&quot; metadata=#&lt;struct Fluent::Plugin::Buffer::Metadata timekey=nil, tag=&quot;microservice.app.*&quot;, variables=nil&gt;
+2019-05-31 11:39:16 +0000 [debug]: [elasticsearch] Indexed (op = index), 76 successes, 6462 cluster_block_exception
+2019-05-31 11:39:18 +0000 [warn]: [elasticsearch] buffer flush took longer time than slow_flush_log_threshold: elapsed_time=30.385294652543962 slow_flush_log_threshold=20.0 plugin_id=&quot;elasticsearch&quot;
+2019-05-31 11:39:18 +0000 [debug]: [elasticsearch] Created new chunk chunk_id=&quot;58a2d7707069fbe07bc313e68a476fbb&quot; metadata=#&lt;struct Fluent::Plugin::Buffer::Metadata timekey=nil, tag=&quot;microservice.access.*&quot;, variables=nil&gt;
+2019-05-31 11:39:20 +0000 [warn]: buffer flush took longer time than slow_flush_log_threshold: elapsed_time=22.49672028142959 slow_flush_log_threshold=20.0 plugin_id=&quot;object:3fe649151df4&quot;
+2019-05-31 11:39:20 +0000 [warn]: [elasticsearch] buffer flush took longer time than slow_flush_log_threshold: elapsed_time=51.35625608731061 slow_flush_log_threshold=20.0 plugin_id=&quot;elasticsearch&quot;
+2019-05-31 11:39:20 +0000 [debug]: [elasticsearch] Indexed (op = index), 21 successes, 6888 cluster_block_exception
+</code></pre>
+
+<p>检查配置，找到原因</p>
+
+<pre><code>GET _settings
+# 执行结果
+&quot;logstash-2019.05.28&quot;: {
+    &quot;settings&quot;: {
+      &quot;index&quot;: {
+        &quot;number_of_shards&quot;: &quot;5&quot;,
+        &quot;blocks&quot;: {
+          &quot;read_only_allow_delete&quot;: &quot;true&quot;
+        },
+        &quot;provided_name&quot;: &quot;logstash-2019.05.28&quot;,
+        &quot;creation_date&quot;: &quot;1559088651380&quot;,
+        &quot;number_of_replicas&quot;: &quot;0&quot;,
+        &quot;uuid&quot;: &quot;bFgUf2e_SYSPmKECdgon4Q&quot;,
+        &quot;version&quot;: {
+          &quot;created&quot;: &quot;6040299&quot;
+        }
+      }
+    }
+  }
+</code></pre>
+
+<p>官方文档解释：
+<a href="https://www.elastic.co/guide/en/elasticsearch/reference/6.4/disk-allocator.html">https://www.elastic.co/guide/en/elasticsearch/reference/6.4/disk-allocator.html</a></p>
+
+<p>简单讲就是磁盘空间不足导致es自动设置索引为只读(允许删除)了，导致28号及之前的索引被锁，log推不上去。在删除部分索引后，新建的索引正常，但还是慢。</p>
+
+<p>临时性解决方法：<a href="https://stackoverflow.com/questions/50609417/elasticsearch-error-cluster-block-exception-forbidden-12-index-read-only-all">https://stackoverflow.com/questions/50609417/elasticsearch-error-cluster-block-exception-forbidden-12-index-read-only-all</a></p>
+
+<pre><code>PUT _settings
+{
+    &quot;index&quot;: {
+      &quot;blocks&quot;: {
+      &quot;read_only_allow_delete&quot;: &quot;false&quot;
+      }
+    }
+}
+</code></pre>
+
+<p>未来的改进：磁盘扩容或者增加es节点</p>
+
+<h3 id="三-既然设置了overflow-action为何还会丢log">三、既然设置了overflow_action为何还会丢log</h3>
+
+<p>通过<a href="https://murat.io/notes/2017/logrotate-container-logs-in-google-container-engine.html">https://murat.io/notes/2017/logrotate-container-logs-in-google-container-engine.html</a> 得知，GKE默认<code>maximum file size</code>和<code>maximum number of files</code>是<code>10mb</code>和<code>5</code>。当log迟迟无法推上ElasticSearch时，pod的<code>log已经发生了轮转</code>，由于fluentd tail插件读取的实际文件为软链接，导致即使BufferOverflowError问题解决，也会丢失log。</p>
+
+<p>以xxx服务为例，看到线上环境log目录下</p>
+
+<pre><code>gke-production-larger-pool-1b83bd61-5ml9 /var/log/pods/a2aa1221-ba7a-11e9-bd74-42010a8a024f/xxx # ls -l
+total 4
+lrwxrwxrwx 1 root root 165 Aug  9 07:52 0.log -&gt; /var/lib/docker/containers/84f23be2470f06614a8a070037385927bfa706bb03e67b314d5b380a3a936f55/84f23be2470f06614a8a070037385927bfa706bb03e67b314d5b380a3a936f55-json.log
+
+gke-production-larger-pool-1b83bd61-5ml9 /var/lib/docker/containers/84f23be2470f06614a8a070037385927bfa706bb03e67b314d5b380a3a936f55 # ls -l
+total 47768
+-r-------- 1 root root  8824513 Aug 13 08:35 84f23be2470f06614a8a070037385927bfa706bb03e67b314d5b380a3a936f55-json.log
+-r-------- 1 root root 10036892 Aug 13 07:24 84f23be2470f06614a8a070037385927bfa706bb03e67b314d5b380a3a936f55-json.log.1
+-r-------- 1 root root 10009127 Aug 13 06:10 84f23be2470f06614a8a070037385927bfa706bb03e67b314d5b380a3a936f55-json.log.2
+-r-------- 1 root root 10000659 Aug 13 04:07 84f23be2470f06614a8a070037385927bfa706bb03e67b314d5b380a3a936f55-json.log.3
+-r-------- 1 root root 10000507 Aug 13 04:07 84f23be2470f06614a8a070037385927bfa706bb03e67b314d5b380a3a936f55-json.log.4
+drwx------ 2 root root     4096 Aug  9 07:52 checkpoints
+-rw-r--r-- 1 root root    20184 Aug  9 07:52 config.v2.json
+-rw-r--r-- 1 root root     1994 Aug  9 07:52 hostconfig.json
+</code></pre>
+
+<p>解决问题的方法是修改GCE的<code>instance template</code>中<code>kube-env</code>部分，添加参数</p>
+
+<pre><code>DOCKER_LOG_MAX_SIZE: Xmb
+DOCKER_LOG_MAX_FILE: Y
+</code></pre>
+
+<p>具体操作可参考: <a href="https://stackoverflow.com/questions/49136527/accessing-kubelet-settings-on-gke-to-fix-nodehasdiskpressure">https://stackoverflow.com/questions/49136527/accessing-kubelet-settings-on-gke-to-fix-nodehasdiskpressure</a></p>
+
+<h3 id="四-日志轮转对fluentd的影响">四、日志轮转对fluentd的影响</h3>
+
+<p>fluentd已经考虑到日志发生轮转的情况，in_tail插件提供了<code>rotate_wait</code>参数，默认值是5s。tail插件内部保存了目标文件的inode号码，当检测到发生log轮转后，在该时间内继续保留对旧文件的引用，以完成对旧文件数据的处理，从而防止数据的丢失。</p>
+
+<p>日志轮转程序通常会有两种模式处理老旧日志：</p>
+
+<ol>
+<li><p>一是拷贝所有旧文件数据到新文件，然后清空老文件，由于旧文件的inode没有发生变化，所以应用程序继续往里写。但这样可能会有丢失数据的风险，即从拷贝完老数据到清空旧文件这段时间所产生的log会丢失。</p></li>
+
+<li><p>二是重命名旧文件，新建空文件，由于inode变化了，所以须为应用程序发送reopen信号使其往新文件中写，这就要求应用程序提供这样的接口，否则需要重启。</p></li>
+</ol>
+
+<p>tail插件对日志转换的处理只适应于方案二，否则inode没有变化，无法感知到发生log轮转，无法从新文件开始读。以logrotate为例，则不应该具有<code>nocreate</code>参数。</p>
+
+<p>另外，在对tail插件path路径的配置，应注意谨慎使用‘*’，否则可能应为该目录下发生日志轮转，增加新的文件，导致log重复读取。推荐使用软链接形式。</p>
+
+<p>参考文档：</p>
+
+<p><a href="https://docs.fluentd.org/output">https://docs.fluentd.org/output</a></p>
+
+<p><a href="https://docs.fluentd.org/input/tail">https://docs.fluentd.org/input/tail</a></p>
+
+<p><a href="https://medium.com/ninjavan-tech/logging-with-efk-in-gke-e11676f781e6">https://medium.com/ninjavan-tech/logging-with-efk-in-gke-e11676f781e6</a></p>
+
+<p><a href="https://docs.fluentd.org/v/0.12/input/tail">https://docs.fluentd.org/v/0.12/input/tail</a></p>
+            </div>
+
+            <div id="container"></div>
+            <link rel="stylesheet" href="https://imsun.github.io/gitment/style/default.css">
+            <script src="https://www.sunlit.tk/js/gitment.browser.js"></script>
+            <script>
+            var gitment = new Gitment({
+              
+              owner: 'penghuiy',
+              repo: 'blogs-hugo',
+              oauth: {
+                client_id: '911f4edf9e215601099b',
+                client_secret: 'acf9b929960c2d742a71682fd83877212ad54532',
+              },
+            })
+            gitment.render('container')
+            </script>
+
+            <div class ="post-donate">
+              <div id="donate_board" class="donate_bar center">
+                <a id="btn_donate" class="btn_donate" href="javascript:;" title="Donate 打赏"></a>
+                <span class="donate_txt">
+                   &uarr;<br>
+                   Enjoy it ? Donate me !  欣赏此文？欢迎为作者提供支持！
+                </span>
+                <br>
+              </div>  
+          
+              <div id="donate_guide" class="donate_bar center hidden">
+                  <a href="https://www.sunlit.tk/img/alipay.jpg" title="支付宝打赏" class="fancybox" rel="article0"       style="float:left;margin-left:25%;margin-right:2px;">
+                  <img src="https://www.sunlit.tk/img/alipay.jpg" title="支付宝打赏" height="164px" width="164px">
+                  </a> 
+              </div>
+              <div id="donate_guide" class="donate_bar center hidden">
+                  <a href="https://www.sunlit.tk/img/wechat.png" title="支付宝打赏" class="fancybox" rel="article0"  >
+                  <img src="https://www.sunlit.tk/img/wechat.png" title="支付宝打赏" height="164px" width="164px">
+                  </a> 
+              </div>
+          
+              <script type="text/javascript">
+                document.getElementById('btn_donate').onclick = function(){
+                  $('#donate_board').addClass('hidden');
+                  $('#donate_guide').removeClass('hidden');
+                }
+              </script>
+            </div>
+
+        </div>
+    </div>
+    <div class="column is-3">
+        <div class="card">
+    <div class="card-content">
+        <h1 class="title is-5">Tags</h1>
+        <div class="tags">
+        
+            <span class="tag"><a href="https://www.sunlit.tk/tags/efk">efk</a></span>
+        
+            <span class="tag"><a href="https://www.sunlit.tk/tags/jenkins">jenkins</a></span>
+        
+            <span class="tag"><a href="https://www.sunlit.tk/tags/kubernetes">kubernetes</a></span>
+        
+        </div>          
+    </div>
+</div><br>
+        <div class="card">
+    <div class="card-content">
+        <h1 class="title is-5">Recent posts</h1>
+        
+            <h1><a href="https://www.sunlit.tk/post/kubernetes/03/">jenkins被驱逐故障记录</a></h1>
+            <time class="has-text-grey-light is-size-7">15 August 2019</time>
+        
+            <h1><a href="https://www.sunlit.tk/post/infrastructure/01/">fluentd日志丢失故障记录及GKE日志轮转分析</a></h1>
+            <time class="has-text-grey-light is-size-7">15 August 2019</time>
+        
+            <h1><a href="https://www.sunlit.tk/post/kubernetes/02/">如何理解pod驱逐策略</a></h1>
+            <time class="has-text-grey-light is-size-7">6 August 2019</time>
+        
+            <h1><a href="https://www.sunlit.tk/post/kubernetes/01/">如何解决k8s服务依赖</a></h1>
+            <time class="has-text-grey-light is-size-7">29 July 2019</time>
+        
+    </div>
+</div>
+    <br>
+                
+
+
+    
+<br>
+        <div class="card">
+    <div class="card-content">
+        <h1 class="title is-5">Archives</h1>
+        
+            <a href="https://www.sunlit.tk/archives/201908">201908</a> (3)<br>
+        
+            <a href="https://www.sunlit.tk/archives/201907">201907</a> (1)<br>
+        
+    </div>
+</div>
+
+    </div>
+</div>
+
+
+    </div>
+</div>
+
+<footer class="footer has-background-grey-darker has-text-white">
+    <div class="content has-text-centered">
+        <p>
+            <span class="icon is-large"><a href="https://twitter.com/" class="mysocial" rel="me"><i class="fab fa-twitter fa-3x"></i></a></span>&nbsp;&nbsp;
+            <span class="icon is-large"><a href="https://www.youtube.com/" class="mysocial" rel="me"><i class="fab fa-youtube fa-3x"></i></a></span>&nbsp;&nbsp;
+            <span class="icon is-large"><a href="https://github.com/" class="mysocial" rel="me"><i class="fab fa-github fa-3x"></i></a></span>&nbsp;&nbsp;
+            <br><br>
+            Copyright &copy; Sunlit&#39;s Blog 2019 - Theme by <a href="https://jeffprod.com" class="mysocial">JeffProd.com</a>
+            - <a class="mysocial" href="https://www.sunlit.tk/about">About</a>
+        </p>
+    </div>
+</footer>
+
+<script defer src="https://use.fontawesome.com/releases/v5.1.0/js/all.js"></script>
+</body>
+</html>
